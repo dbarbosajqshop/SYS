@@ -1,0 +1,3028 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "JQStock API",
+    "description": "API para gestão de estoques, ruas, edificações e usuários",
+    "version": "1.0.0",
+    "contact": {
+      "email": "gustavode.s.fonseca@gmail.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://wa-jqstock-api-dev.azurewebsites.net",
+      "description": "Produção"
+    },
+    {
+      "url": "http://localhost:8080",
+      "description": "Desenvolvimento"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Autenticação",
+      "description": "Operações de login"
+    },
+    {
+      "name": "Usuários",
+      "description": "Gestão de usuários"
+    },
+    {
+      "name": "Auditoria",
+      "description": "Operações de auditoria e logs do sistema"
+    },
+    {
+      "name": "Estoques",
+      "description": "Gestão de estoques"
+    },
+    {
+      "name": "Ruas",
+      "description": "Gestão de ruas"
+    },
+    {
+      "name": "Prédios",
+      "description": "Gestão de edificações (builds)"
+    },
+    {
+      "name": "Andares",
+      "description": "Gestão de andares (floors)"
+    },
+    {
+      "name": "Itens",
+      "description": "Gestão de itens"
+    },
+    {
+      "name": "Itens Estocados",
+      "description": "Gestão de itens estocados (stocked items)"
+    },
+    {
+      "name": "Itens Reservados",
+      "description": "Gestão de itens reservados (reserved items)"
+    }
+  ],
+  "paths": {
+    "/login": {
+      "post": {
+        "tags": [
+          "Autenticação"
+        ],
+        "summary": "Autenticar usuário",
+        "description": "Realiza login e retorna token JWT",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              },
+              "example": {
+                "email": "admin@jqstock.com",
+                "password": "admin123"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login realizado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                },
+                "example": {
+                  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                  "userId": "507f1f77bcf86cd799439011",
+                  "email": "admin@jqstock.com"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          }
+        }
+      }
+    },
+    "/users": {
+      "get": {
+        "tags": [
+          "Usuários"
+        ],
+        "summary": "Listar usuários",
+        "description": "Retorna lista paginada de usuários ativos",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/page"
+          },
+          {
+            "$ref": "#/components/parameters/limit"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de usuários",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserListResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Usuários"
+        ],
+        "summary": "Criar usuário",
+        "description": "Cadastra um novo usuário no sistema",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Usuário criado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          }
+        }
+      }
+    },
+   "/audit-logs/item": {
+      "get": {
+        "tags": [
+          "Auditoria"
+        ],
+        "summary": "Listar logs de auditoria de itens com filtros",
+        "description": "Retorna os logs de auditoria relacionados a ações em itens com possibilidade de filtros avançados. Suporta paginação.",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "description": "ID do usuário que realizou a ação",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "507f1f77bcf86cd799439011"
+            }
+          },
+          {
+            "name": "targetId",
+            "in": "query",
+            "description": "ID do item alvo da ação",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "682cc8f9158c96882d5df85c"
+            }
+          },
+          {
+            "name": "action",
+            "in": "query",
+            "description": "Tipo de ação realizada (CREATE, UPDATE, INACTIVATE, REACTIVATE, UPDATE_PHOTO)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "CREATE",
+                "UPDATE",
+                "INACTIVATE",
+                "REACTIVATE",
+                "UPDATE_PHOTO"
+              ],
+              "example": "UPDATE"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Número da página para paginação",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "example": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Quantidade de itens por página",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 10,
+              "example": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de logs de auditoria de itens",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AuditLogItem"
+                  }
+                },
+                "example": [
+                  {
+                    "_id": "64a1b5c5e8b7f61234e56789",
+                    "action": "UPDATE",
+                    "userId": "507f1f77bcf86cd799439011",
+                    "targetId": "682cc8f9158c96882d5df85c",
+                    "targetType": "Item",
+                    "targetName": "Produto XYZ",
+                    "changes": [
+                      {
+                        "field": "price",
+                        "oldValue": 100.5,
+                        "newValue": 120.75
+                      },
+                      {
+                        "field": "quantityBox",
+                        "oldValue": 10,
+                        "newValue": 15
+                      }
+                    ],
+                    "createdAt": "2023-07-01T10:30:00.000Z"
+                  }
+                ]
+              }
+            }
+          },
+          "400": {
+            "description": "Parâmetros de paginação inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "message": "Os parâmetros page e limit devem ser números positivos",
+                  "status": 400
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "description": "Acesso negado - permissões insuficientes"
+          }
+        }
+      }
+    },
+    "/audit-logs/user": {
+      "get": {
+        "tags": [
+          "Auditoria"
+        ],
+        "summary": "Listar logs de auditoria de usuário",
+        "description": "Retorna os logs de auditoria relacionados a ações de usuários. Pode ser filtrado por ID do usuário que realizou a ação ou ID do usuário alvo da ação.",
+        "parameters": [
+          {
+            "name": "targetId",
+            "in": "query",
+            "description": "ID do usuário alvo da ação auditada",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "682cc8f9158c96882d5df85c"
+            }
+          },
+          {
+            "name": "userId",
+            "in": "query",
+            "description": "ID do usuário que realizou a ação auditada",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "682cc8f9158c96882d5df85c"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de logs de auditoria",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AuditLog"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "description": "Acesso negado - permissões insuficientes"
+          }
+        }
+      }
+    },
+    "/stocks": {
+      "get": {
+        "tags": [
+          "Estoques"
+        ],
+        "summary": "Listar estoques",
+        "description": "Retorna lista paginada de estoques",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/page"
+          },
+          {
+            "$ref": "#/components/parameters/limit"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de estoques",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StockListResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Estoques"
+        ],
+        "summary": "Criar estoque",
+        "description": "Cadastra um novo estoque",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateStockRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Estoque criado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Stock"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          }
+        }
+      }
+    },
+    "/stocks/{id}": {
+      "get": {
+        "tags": [
+          "Estoques"
+        ],
+        "summary": "Obter estoque",
+        "description": "Retorna detalhes de um estoque específico",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/stockId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Detalhes do estoque",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Stock"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Estoques"
+        ],
+        "summary": "Atualizar estoque",
+        "description": "Atualiza informações de um estoque",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/stockId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateStockRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Estoque atualizado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Stock"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Estoques"
+        ],
+        "summary": "Desativar estoque",
+        "description": "Realiza desativação lógica de um estoque",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/stockId"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Estoque desativado"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/streets": {
+      "get": {
+        "tags": [
+          "Ruas"
+        ],
+        "summary": "Listar ruas",
+        "description": "Retorna lista paginada de ruas",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/page"
+          },
+          {
+            "$ref": "#/components/parameters/limit"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de ruas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StreetListResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Ruas"
+        ],
+        "summary": "Criar rua",
+        "description": "Cadastra uma nova rua",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateStreetRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Rua criada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Street"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          }
+        }
+      }
+    },
+    "/streets/{id}": {
+      "get": {
+        "tags": [
+          "Ruas"
+        ],
+        "summary": "Obter rua",
+        "description": "Retorna detalhes de uma rua específica",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/streetId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Detalhes da rua",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Street"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Ruas"
+        ],
+        "summary": "Atualizar rua",
+        "description": "Atualiza informações de uma rua",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/streetId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateStreetRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Rua atualizada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Street"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Ruas"
+        ],
+        "summary": "Desativar rua",
+        "description": "Realiza desativação lógica de uma rua",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/streetId"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Rua desativada"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/builds": {
+      "get": {
+        "tags": [
+          "Prédios"
+        ],
+        "summary": "Listar edificações",
+        "description": "Retorna lista paginada de edificações",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/page"
+          },
+          {
+            "$ref": "#/components/parameters/limit"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de edificações",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuildListResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Prédios"
+        ],
+        "summary": "Criar Prédio",
+        "description": "Cadastra uma nova Prédio vinculada a uma rua específica",
+        "parameters": [
+          {
+            "name": "StreetId",
+            "in": "path",
+            "description": "ID da rua onde a Prédio será criada",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "607f1f77bcf86cd799439012"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBuildRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Edificação criada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Build"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          }
+        }
+      }
+    },
+    "/builds/{id}": {
+      "get": {
+        "tags": [
+          "Prédios"
+        ],
+        "summary": "Obter Prédio",
+        "description": "Retorna detalhes de uma Prédio específica",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/buildId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Detalhes da Prédio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Build"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Prédios"
+        ],
+        "summary": "Atualizar Prédio",
+        "description": "Atualiza informações de uma Prédio",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/buildId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateBuildRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Edificação atualizada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Build"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Prédios"
+        ],
+        "summary": "Desativar Prédio",
+        "description": "Realiza desativação lógica de uma Prédio",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/buildId"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Edificação desativada"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/builds/reative/{id}": {
+      "put": {
+        "tags": [
+          "Prédios"
+        ],
+        "summary": "Reativar Prédio",
+        "description": "Reativa uma Prédio previamente desativada",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/buildId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Edificação reativada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Build"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/floors": {
+      "get": {
+        "tags": [
+          "Andares"
+        ],
+        "summary": "Listar andares",
+        "description": "Retorna lista paginada de andares",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/page"
+          },
+          {
+            "$ref": "#/components/parameters/limit"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de andares",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FloorListResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Andares"
+        ],
+        "summary": "Criar andar",
+        "description": "Cadastra um novo andar",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateFloorRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Andar criado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Floor"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          }
+        }
+      }
+    },
+    "/floors/{id}": {
+      "get": {
+        "tags": [
+          "Andares"
+        ],
+        "summary": "Obter andar",
+        "description": "Retorna detalhes de um andar específico",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/floorId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Detalhes do andar",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Floor"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Andares"
+        ],
+        "summary": "Atualizar andar",
+        "description": "Atualiza informações de um andar",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/floorId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateFloorRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Andar atualizado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Floor"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Andares"
+        ],
+        "summary": "Desativar andar",
+        "description": "Realiza desativação lógica de um andar",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/floorId"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Andar desativado"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/reserved-items": {
+      "get": {
+        "tags": [
+          "Itens Reservados"
+        ],
+        "summary": "Listar itens reservados",
+        "description": "Retorna lista de itens reservados",
+        "security": [
+          {
+            "bearerAuth": [
+              "r_items"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de itens reservados",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReservedItem"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          }
+        }
+      }
+    },
+    "/items": {
+      "get": {
+        "tags": [
+          "Itens"
+        ],
+        "summary": "Lista todos os itens ativos",
+        "security": [
+          {
+            "bearerAuth": [
+              "r_items"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "Número de itens por página"
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "Número da página"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de itens paginada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Item"
+                      }
+                    },
+                    "totalItems": {
+                      "type": "integer"
+                    },
+                    "totalPages": {
+                      "type": "integer"
+                    },
+                    "currentPage": {
+                      "type": "integer"
+                    },
+                    "limit": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Itens"
+        ],
+        "summary": "Cria um novo item",
+        "security": [
+          {
+            "bearerAuth": [
+              "w_items"
+            ]
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "price",
+                  "quantityBox",
+                  "sku",
+                  "depth",
+                  "width",
+                  "height",
+                  "weight"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "category": {
+                    "type": "string",
+                    "format": "objectId"
+                  },
+                  "price": {
+                    "type": "number"
+                  },
+                  "quantityBox": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "promotionPrice": {
+                    "type": "number"
+                  },
+                  "sku": {
+                    "type": "string"
+                  },
+                  "depth": {
+                    "type": "number"
+                  },
+                  "width": {
+                    "type": "number"
+                  },
+                  "height": {
+                    "type": "number"
+                  },
+                  "weight": {
+                    "type": "number"
+                  },
+                  "wholesalePrice": {
+                    "type": "number",
+                    "nullable": true
+                  },
+                  "retailPrice": {
+                    "type": "number",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Item criado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Item"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflito - Item já existe"
+          }
+        }
+      }
+    },
+    "/items/search": {
+      "get": {
+        "tags": [
+          "Itens"
+        ],
+        "summary": "Busca itens por SKU, UPC ou nome",
+        "security": [
+          {
+            "bearerAuth": [
+              "r_items"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "sku",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "upc",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "name",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de itens encontrados",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Item"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Nenhum item encontrado"
+          }
+        }
+      }
+    },
+    "/items/{id}": {
+      "get": {
+        "tags": [
+          "Itens"
+        ],
+        "summary": "Obtém um item pelo ID",
+        "security": [
+          {
+            "bearerAuth": [
+              "r_items"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "objectId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Item encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Item"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Item não encontrado"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Itens"
+        ],
+        "summary": "Atualiza um item",
+        "security": [
+          {
+            "bearerAuth": [
+              "u_items"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "objectId"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ItemUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Item atualizado com sucesso"
+          },
+          "404": {
+            "description": "Item não encontrado"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Itens"
+        ],
+        "summary": "Inativa um item",
+        "security": [
+          {
+            "bearerAuth": [
+              "d_items"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "objectId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Item inativado com sucesso"
+          },
+          "400": {
+            "description": "Item já está inativo"
+          },
+          "404": {
+            "description": "Item não encontrado"
+          }
+        }
+      }
+    },
+    "/items/photo/{id}": {
+      "get": {
+        "tags": [
+          "Itens"
+        ],
+        "summary": "Obtém a foto de um item",
+        "security": [
+          {
+            "bearerAuth": [
+              "r_items"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "objectId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Foto do item",
+            "content": {
+              "image/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Imagem não encontrada"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Itens"
+        ],
+        "summary": "Atualiza a foto de um item",
+        "security": [
+          {
+            "bearerAuth": [
+              "u_items"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "objectId"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "url"
+                ],
+                "properties": {
+                  "url": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "URL da imagem atualizada"
+          },
+          "404": {
+            "description": "Item não encontrado"
+          }
+        }
+      }
+    },
+    "/items/reative/{id}": {
+      "put": {
+        "tags": [
+          "Itens"
+        ],
+        "summary": "Reativa um item",
+        "security": [
+          {
+            "bearerAuth": [
+              "u_items"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "objectId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Item reativado com sucesso"
+          },
+          "400": {
+            "description": "Item já está ativo"
+          },
+          "404": {
+            "description": "Item não encontrado"
+          }
+        }
+      }
+    },
+    "/stocked-items": {
+      "get": {
+        "tags": [
+          "Itens Estocados"
+        ],
+        "summary": "Lista todos os itens estocados",
+        "description": "Retorna uma lista paginada de itens estocados com seus detalhes",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "local",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filtrar por localização"
+          },
+          {
+            "in": "query",
+            "name": "name",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filtrar por nome do item"
+          },
+          {
+            "in": "query",
+            "name": "sku",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filtrar por SKU do item"
+          },
+          {
+            "in": "query",
+            "name": "upc",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filtrar por UPC do item"
+          },
+          {
+            "in": "query",
+            "name": "type",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "box",
+                "unit"
+              ]
+            },
+            "description": "Filtrar por tipo de estocagem"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de itens estocados",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/StockedItem"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autorizado"
+          },
+          "403": {
+            "description": "Acesso negado"
+          }
+        }
+      }
+    },
+    "/stocked-items/purchase/{purchaseId}": {
+      "post": {
+        "tags": [
+          "Itens Estocados"
+        ],
+        "summary": "Estoca itens de uma compra",
+        "description": "Cria registros de estoque para todos os itens de uma compra",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "purchaseId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID da compra"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Itens estocados com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/StockedItem"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Compra não encontrada"
+          },
+          "401": {
+            "description": "Não autorizado"
+          },
+          "403": {
+            "description": "Acesso negado"
+          }
+        }
+      }
+    },
+    "/stocked-items/{id}": {
+      "put": {
+        "tags": [
+          "Itens Estocados"
+        ],
+        "summary": "Estoca um item em uma localização",
+        "description": "Atualiza a localização de um item estocado",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID do item estocado"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "local": {
+                    "type": "string",
+                    "description": "Código da localização"
+                  }
+                },
+                "required": [
+                  "local"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Item estocado atualizado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StockedItem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Item ou local não encontrado"
+          },
+          "409": {
+            "description": "Item já estocado"
+          },
+          "401": {
+            "description": "Não autorizado"
+          },
+          "403": {
+            "description": "Acesso negado"
+          }
+        }
+      }
+    },
+    "/stocked-items/{id}/quantity": {
+      "put": {
+        "tags": [
+          "Itens Estocados"
+        ],
+        "summary": "Atualiza a quantidade de um item estocado",
+        "description": "Modifica a quantidade disponível de um item em estoque",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID do item estocado"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "newQuantity": {
+                    "type": "number",
+                    "description": "Nova quantidade do item"
+                  }
+                },
+                "required": [
+                  "newQuantity"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Quantidade atualizada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StockedItem"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Quantidade não enviada"
+          },
+          "401": {
+            "description": "Não autorizado"
+          },
+          "403": {
+            "description": "Acesso negado"
+          }
+        }
+      }
+    },
+    "/stocked-items/{id}/transfer": {
+      "put": {
+        "tags": [
+          "Itens Estocados"
+        ],
+        "summary": "Transfere um item para nova localização",
+        "description": "Transfere quantidade específica de um item para outro local",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID do item estocado"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "local": {
+                    "type": "string",
+                    "description": "Código do local de destino"
+                  },
+                  "quantity": {
+                    "type": "number",
+                    "description": "Quantidade a ser transferida"
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "box",
+                      "unit"
+                    ],
+                    "description": "Tipo de unidade para transferência"
+                  }
+                },
+                "required": [
+                  "local",
+                  "quantity",
+                  "type"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Transferência realizada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "originalStockedItem": {
+                      "$ref": "#/components/schemas/StockedItem"
+                    },
+                    "destinationStockedItem": {
+                      "$ref": "#/components/schemas/StockedItem"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Quantidade insuficiente para transferir"
+          },
+          "404": {
+            "description": "Item ou local não encontrado"
+          },
+          "409": {
+            "description": "Item já está no local especificado"
+          },
+          "401": {
+            "description": "Não autorizado"
+          },
+          "403": {
+            "description": "Acesso negado"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "example": "507f1f77bcf86cd799439011"
+          },
+          "name": {
+            "type": "string",
+            "example": "Admin User"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "admin@jqstock.com"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "admin",
+              "user"
+            ],
+            "default": "user",
+            "example": "admin"
+          },
+          "active": {
+            "type": "boolean",
+            "default": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2023-01-01T00:00:00Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "AuditLogItem": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "example": "64a1b5c5e8b7f61234e56789",
+            "description": "ID do registro de log"
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "CREATE",
+              "UPDATE",
+              "INACTIVATE",
+              "REACTIVATE",
+              "UPDATE_PHOTO"
+            ],
+            "example": "UPDATE",
+            "description": "Tipo de ação realizada"
+          },
+          "userId": {
+            "type": "string",
+            "example": "507f1f77bcf86cd799439011",
+            "description": "ID do usuário que realizou a ação"
+          },
+          "targetId": {
+            "type": "string",
+            "example": "682cc8f9158c96882d5df85c",
+            "description": "ID do item alvo da ação"
+          },
+          "targetType": {
+            "type": "string",
+            "example": "Item",
+            "description": "Tipo do alvo (sempre 'Item' para esta rota)"
+          },
+          "targetName": {
+            "type": "string",
+            "example": "Produto XYZ",
+            "description": "Nome do item no momento da ação"
+          },
+          "changes": {
+            "type": "array",
+            "description": "Lista de alterações realizadas",
+            "items": {
+              "type": "object",
+              "properties": {
+                "field": {
+                  "type": "string",
+                  "example": "price",
+                  "description": "Campo que foi alterado"
+                },
+                "oldValue": {
+                  "type": [
+                    "string",
+                    "number",
+                    "boolean",
+                    "object",
+                    "array",
+                    "null"
+                  ],
+                  "description": "Valor anterior do campo (não presente em ações CREATE)"
+                },
+                "newValue": {
+                  "type": [
+                    "string",
+                    "number",
+                    "boolean",
+                    "object",
+                    "array",
+                    "null"
+                  ],
+                  "description": "Novo valor do campo"
+                }
+              },
+              "required": [
+                "field",
+                "newValue"
+              ]
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2023-07-01T10:30:00.000Z",
+            "description": "Data e hora em que o log foi registrado"
+          }
+        },
+        "required": [
+          "_id",
+          "action",
+          "userId",
+          "targetId",
+          "targetType",
+          "changes",
+          "createdAt"
+        ]
+      },
+      "AuditLog": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "example": "507f1f77bcf86cd799439011"
+          },
+          "action": {
+            "type": "string",
+            "example": "user.update",
+            "description": "Tipo de ação realizada"
+          },
+          "targetId": {
+            "type": "string",
+            "example": "682cc8f9158c96882d5df85c",
+            "description": "ID do usuário alvo da ação"
+          },
+          "userId": {
+            "type": "string",
+            "example": "507f1f77bcf86cd799439011",
+            "description": "ID do usuário que realizou a ação"
+          },
+          "metadata": {
+            "type": "object",
+            "description": "Dados adicionais sobre a ação"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2023-01-01T00:00:00Z"
+          }
+        }
+      },
+      "Stock": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "example": "507f1f77bcf86cd799439011"
+          },
+          "name": {
+            "type": "string",
+            "example": "Main Warehouse"
+          },
+          "description": {
+            "type": "string",
+            "example": "Primary storage location"
+          },
+          "code": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9]{3}$",
+            "example": "WH1"
+          },
+          "Streets": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "active": {
+            "type": "boolean",
+            "default": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedBy": {
+            "type": "string"
+          }
+        }
+      },
+      "Street": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "example": "507f1f77bcf86cd799439011"
+          },
+          "StockId": {
+            "type": "string",
+            "example": "607f1f77bcf86cd799439012"
+          },
+          "name": {
+            "type": "string",
+            "example": "Main Street"
+          },
+          "description": {
+            "type": "string",
+            "example": "Primary street location"
+          },
+          "code": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9]{3}$",
+            "example": "ST1"
+          },
+          "Builds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "active": {
+            "type": "boolean",
+            "default": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedBy": {
+            "type": "string"
+          }
+        }
+      },
+      "Build": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "example": "507f1f77bcf86cd799439013"
+          },
+          "StreetId": {
+            "type": "string",
+            "example": "607f1f77bcf86cd799439012"
+          },
+          "name": {
+            "type": "string",
+            "example": "Building A"
+          },
+          "description": {
+            "type": "string",
+            "example": "Main building"
+          },
+          "code": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9]{3}$",
+            "example": "BLD"
+          },
+          "Floors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Lista de IDs dos andares desta Prédio"
+          },
+          "active": {
+            "type": "boolean",
+            "default": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedBy": {
+            "type": "string"
+          }
+        }
+      },
+      "Floor": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "example": "507f1f77bcf86cd799439013"
+          },
+          "BuildId": {
+            "type": "string",
+            "example": "607f1f77bcf86cd799439012"
+          },
+          "name": {
+            "type": "string",
+            "example": "Building A"
+          },
+          "description": {
+            "type": "string",
+            "example": "Main building"
+          },
+          "localCode": {
+            "type": "string",
+            "example": "A1"
+          },
+          "code": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9]{3}$",
+            "example": "BLD"
+          },
+          "stockedItems": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Lista de IDs dos itens estocados neste andar"
+          },
+          "active": {
+            "type": "boolean",
+            "default": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedBy": {
+            "type": "string"
+          }
+        }
+      },
+      "LoginRequest": {
+        "type": "object",
+        "required": [
+          "email",
+          "password"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "admin@jqstock.com"
+          },
+          "password": {
+            "type": "string",
+            "example": "admin123"
+          }
+        }
+      },
+      "LoginResponse": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          },
+          "userId": {
+            "type": "string",
+            "example": "507f1f77bcf86cd799439011"
+          },
+          "email": {
+            "type": "string",
+            "example": "admin@jqstock.com"
+          }
+        }
+      },
+      "CreateUserRequest": {
+        "type": "object",
+        "required": [
+          "name",
+          "email",
+          "password"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "New User"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "user@jqstock.com"
+          },
+          "password": {
+            "type": "string",
+            "example": "securepassword"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "admin",
+              "user"
+            ],
+            "default": "user"
+          }
+        }
+      },
+      "CreateStockRequest": {
+        "type": "object",
+        "required": [
+          "name",
+          "code",
+          "createdBy"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "New Warehouse"
+          },
+          "description": {
+            "type": "string",
+            "example": "Additional storage"
+          },
+          "code": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9]{3}$",
+            "example": "WH2"
+          },
+          "createdBy": {
+            "type": "string",
+            "example": "507f1f77bcf86cd799439011"
+          }
+        }
+      },
+      "UpdateStockRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Updated Warehouse Name"
+          },
+          "description": {
+            "type": "string",
+            "example": "Updated description"
+          },
+          "code": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9]{3}$",
+            "example": "WH2"
+          }
+        }
+      },
+      "CreateStreetRequest": {
+        "type": "object",
+        "required": [
+          "StockId",
+          "name",
+          "code",
+          "createdBy"
+        ],
+        "properties": {
+          "StockId": {
+            "type": "string",
+            "example": "507f1f77bcf86cd799439011"
+          },
+          "name": {
+            "type": "string",
+            "example": "Secondary Street"
+          },
+          "description": {
+            "type": "string",
+            "example": "Additional street location"
+          },
+          "code": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9]{3}$",
+            "example": "ST2"
+          },
+          "createdBy": {
+            "type": "string",
+            "example": "507f1f77bcf86cd799439011"
+          }
+        }
+      },
+      "UpdateStreetRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Updated Street Name"
+          },
+          "description": {
+            "type": "string",
+            "example": "Updated street description"
+          },
+          "code": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9]{3}$",
+            "example": "ST2"
+          }
+        }
+      },
+      "CreateBuildRequest": {
+        "type": "object",
+        "required": [
+          "name",
+          "code",
+          "createdBy"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Nova Edificação"
+          },
+          "description": {
+            "type": "string",
+            "example": "Edificação principal"
+          },
+          "code": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9]{3}$",
+            "example": "BLD"
+          },
+          "createdBy": {
+            "type": "string",
+            "example": "507f1f77bcf86cd799439011"
+          }
+        }
+      },
+      "UpdateBuildRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Nome Atualizado da Edificação"
+          },
+          "description": {
+            "type": "string",
+            "example": "Descrição atualizada"
+          },
+          "code": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9]{3}$",
+            "example": "BLD"
+          }
+        }
+      },
+      "UserListResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/User"
+            }
+          },
+          "totalItems": {
+            "type": "integer",
+            "example": 15
+          },
+          "totalPages": {
+            "type": "integer",
+            "example": 2
+          },
+          "currentPage": {
+            "type": "integer",
+            "example": 1
+          },
+          "itemsPerPage": {
+            "type": "integer",
+            "example": 10
+          }
+        }
+      },
+      "StockListResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Stock"
+            }
+          },
+          "totalItems": {
+            "type": "integer",
+            "example": 15
+          },
+          "totalPages": {
+            "type": "integer",
+            "example": 2
+          },
+          "currentPage": {
+            "type": "integer",
+            "example": 1
+          },
+          "limit": {
+            "type": "integer",
+            "example": 10
+          }
+        }
+      },
+      "StreetListResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Street"
+            }
+          },
+          "totalItems": {
+            "type": "integer",
+            "example": 15
+          },
+          "totalPages": {
+            "type": "integer",
+            "example": 2
+          },
+          "currentPage": {
+            "type": "integer",
+            "example": 1
+          },
+          "limit": {
+            "type": "integer",
+            "example": 10
+          }
+        }
+      },
+      "BuildListResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Build"
+            }
+          },
+          "totalItems": {
+            "type": "integer",
+            "example": 15
+          },
+          "totalPages": {
+            "type": "integer",
+            "example": 2
+          },
+          "currentPage": {
+            "type": "integer",
+            "example": 1
+          },
+          "limit": {
+            "type": "integer",
+            "example": 10
+          }
+        }
+      },
+      "UpdateFloorRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Updated Floor Name"
+          },
+          "description": {
+            "type": "string",
+            "example": "Updated floor description"
+          },
+          "code": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9]{3}$",
+            "example": "FL2"
+          }
+        }
+      },
+      "FloorListResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Floor"
+            }
+          },
+          "totalItems": {
+            "type": "integer",
+            "example": 15
+          },
+          "totalPages": {
+            "type": "integer",
+            "example": 2
+          },
+          "currentPage": {
+            "type": "integer",
+            "example": 1
+          },
+          "limit": {
+            "type": "integer",
+            "example": 10
+          }
+        }
+      },
+      "CreateFloorRequest": {
+        "type": "object",
+        "required": [
+          "BuildId",
+          "name",
+          "code",
+          "createdBy"
+        ],
+        "properties": {
+          "BuildId": {
+            "type": "string",
+            "example": "607f1f77bcf86cd799439013"
+          },
+          "name": {
+            "type": "string",
+            "example": "New Floor"
+          },
+          "description": {
+            "type": "string",
+            "example": "Additional floor"
+          },
+          "code": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9]{3}$",
+            "example": "FL2"
+          },
+          "createdBy": {
+            "type": "string",
+            "example": "507f1f77bcf86cd799439011"
+          }
+        }
+      },
+      "ReservedItem": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "example": "507f1f77bcf86cd799439011"
+          },
+          "ItemId": {
+            "type": "string",
+            "example": "507f1f77bcf86cd799439012"
+          },
+          "orderId": {
+            "type": "string",
+            "example": "507f1f77bcf86cd799439013"
+          },
+          "quantityBox": {
+            "type": "number",
+            "example": 5
+          },
+          "quantityUnit": {
+            "type": "number",
+            "example": 10
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdBy": {
+            "type": "string",
+            "example": "507f1f77bcf86cd799439014"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedBy": {
+            "type": "string",
+            "example": "507f1f77bcf86cd799439014"
+          },
+          "active": {
+            "type": "boolean",
+            "example": true
+          }
+        }
+      },
+      "Item": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "format": "objectId"
+          },
+          "sku": {
+            "type": "string"
+          },
+          "upc": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "description": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string",
+            "format": "objectId"
+          },
+          "price": {
+            "type": "number"
+          },
+          "wholesalePrice": {
+            "type": "number"
+          },
+          "retailPrice": {
+            "type": "number"
+          },
+          "promotionPrice": {
+            "type": "number",
+            "default": 0
+          },
+          "taxPrices": {
+            "type": "boolean",
+            "default": false
+          },
+          "height": {
+            "type": "number"
+          },
+          "width": {
+            "type": "number"
+          },
+          "depth": {
+            "type": "number"
+          },
+          "weight": {
+            "type": "number"
+          },
+          "quantityBox": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "color": {
+            "type": "string",
+            "maxLength": 50
+          },
+          "imageUrl": {
+            "type": "string"
+          },
+          "active": {
+            "type": "boolean",
+            "default": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "objectId"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedBy": {
+            "type": "string",
+            "format": "objectId"
+          }
+        }
+      },
+      "ItemUpdate": {
+        "type": "object",
+        "properties": {
+          "sku": {
+            "type": "string"
+          },
+          "upc": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "description": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string",
+            "format": "objectId"
+          },
+          "price": {
+            "type": "number"
+          },
+          "promotionPrice": {
+            "type": "number"
+          },
+          "height": {
+            "type": "number"
+          },
+          "width": {
+            "type": "number"
+          },
+          "depth": {
+            "type": "number"
+          },
+          "weight": {
+            "type": "number"
+          },
+          "quantityBox": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "imageUrl": {
+            "type": "string"
+          },
+          "color": {
+            "type": "string",
+            "maxLength": 50
+          }
+        }
+      },
+      "StockedItem": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "ItemId": {
+            "type": "string"
+          },
+          "FloorId": {
+            "type": "string"
+          },
+          "local": {
+            "type": "string",
+            "default": "Sem local"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "box",
+              "unit"
+            ]
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedBy": {
+            "type": "string"
+          },
+          "active": {
+            "type": "boolean",
+            "default": true
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "Mensagem de erro"
+          },
+          "status": {
+            "type": "integer",
+            "example": 400
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "field": {
+                  "type": "string",
+                  "example": "code"
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Código inválido"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "parameters": {
+      "page": {
+        "name": "page",
+        "in": "query",
+        "description": "Número da página",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 1,
+          "example": 1
+        }
+      },
+      "limit": {
+        "name": "limit",
+        "in": "query",
+        "description": "Itens por página",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100,
+          "default": 10,
+          "example": 10
+        }
+      },
+      "stockId": {
+        "name": "id",
+        "in": "path",
+        "description": "ID do estoque",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "example": "507f1f77bcf86cd799439011"
+        }
+      },
+      "streetId": {
+        "name": "id",
+        "in": "path",
+        "description": "ID da rua",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "example": "607f1f77bcf86cd799439012"
+        }
+      },
+      "buildId": {
+        "name": "id",
+        "in": "path",
+        "description": "ID da Prédio",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "example": "707f1f77bcf86cd799439013"
+        }
+      },
+      "floorId": {
+        "name": "id",
+        "in": "path",
+        "description": "ID do andar",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "example": "507f1f77bcf86cd799439014"
+        }
+      },
+      "itemId": {
+        "name": "id",
+        "in": "path",
+        "description": "ID do item",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "example": "507f1f77bcf86cd799439015"
+        }
+      }
+    },
+    "responses": {
+      "BadRequestError": {
+        "description": "Requisição inválida",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "examples": {
+              "InvalidCode": {
+                "value": {
+                  "message": "Código inválido - deve ter 3 caracteres alfanuméricos",
+                  "status": 400
+                }
+              }
+            }
+          }
+        }
+      },
+      "UnauthorizedError": {
+        "description": "Não autorizado",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "examples": {
+              "InvalidCredentials": {
+                "value": {
+                  "message": "Credenciais inválidas",
+                  "status": 401
+                }
+              }
+            }
+          }
+        }
+      },
+      "NotFoundError": {
+        "description": "Recurso não encontrado",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "examples": {
+              "StockNotFound": {
+                "value": {
+                  "message": "Estoque não encontrado",
+                  "status": 404
+                }
+              }
+            }
+          }
+        }
+      },
+      "ConflictError": {
+        "description": "Conflito",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "examples": {
+              "DuplicateCode": {
+                "value": {
+                  "message": "Código já está em uso",
+                  "status": 409
+                }
+              }
+            }
+          }
+        }
+      },
+      "ServerError": {
+        "description": "Erro interno do servidor",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "examples": {
+              "DatabaseError": {
+                "value": {
+                  "message": "Erro ao acessar o banco de dados",
+                  "status": 500
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

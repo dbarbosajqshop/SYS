@@ -1,0 +1,81 @@
+name: Deploy to Firebase Hosting for Multiple Projects
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy_jqshop:
+    name: Deploy to JQShop
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Create .env file for JQShop
+        run: |
+          echo "VITE_BACKEND_URL=${{ secrets.JQSHOP_VITE_BACKEND_URL }}" > .env
+          echo "VITE_LOGO_URL=${{ secrets.JQSHOP_VITE_LOGO_URL }}" >> .env
+          echo "VITE_APP_TITLE=${{ secrets.JQSHOP_VITE_APP_TITLE }}" >> .env
+          echo "Conteúdo do .env para JQShop:"
+          cat .env
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm install -g firebase-tools@13.11.0
+
+      - name: Build project
+        run: npm run build
+
+      - name: Deploy to Firebase (JQShop)
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.JQSHOP_FIREBASE_SERVICE_ACCOUNT }}
+          channelId: live
+          projectId: jq-stock
+
+  deploy_keni:
+    name: Deploy to Keni
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Create .env file for Keni
+        run: |
+          echo "VITE_BACKEND_URL=${{ secrets.KENI_VITE_BACKEND_URL }}" > .env
+          echo "VITE_LOGO_URL=${{ secrets.KENI_VITE_LOGO_URL }}" >> .env
+          echo "VITE_APP_TITLE=${{ secrets.KENI_VITE_APP_TITLE }}" >> .env
+          echo "Conteúdo do .env para Keni:"
+          cat .env
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm install -g firebase-tools@13.11.0
+
+      - name: Build project
+        run: npm run build
+
+      - name: Deploy to Firebase (Keni)
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.KENI_FIREBASE_SERVICE_ACCOUNT }}
+          channelId: live
+          projectId: keni-shop

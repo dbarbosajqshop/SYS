@@ -1,0 +1,8 @@
+node_modules
+petstore.swagger.json
+temp/*
+!temp/.gitkeep
+app.yaml
+.env*
+src/config/secrets/*.json
+app-*.yaml

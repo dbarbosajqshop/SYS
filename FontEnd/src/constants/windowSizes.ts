@@ -1,0 +1,5 @@
+export enum MAX_DEVICE_WIDTH {
+  MOBILE = 480,
+  TABLET = 1024,
+  DESKTOP = 1200,
+}

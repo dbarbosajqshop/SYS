@@ -1,0 +1,122 @@
+[
+  {
+    "id": 1,
+    "store": "Lorem Ipsum",
+    "items": 50,
+    "price": 100.50,
+    "date": "2021-01-01",
+    "status": "entregue"
+  },
+  {
+    "id": 2,
+    "store": "Dolor Sit",
+    "items": 30,
+    "price": 75.00,
+    "date": "2021-02-15",
+    "status": "entregue"
+  },
+  {
+    "id": 3,
+    "store": "Amet Consectetur",
+    "items": 10,
+    "price": 200.00,
+    "date": "2021-03-10",
+    "status": "pendente"
+  },
+  {
+    "id": 4,
+    "store": "Adipiscing Elit",
+    "items": 40,
+    "price": 180.99,
+    "date": "2021-04-25",
+    "status": "entregue"
+  },
+  {
+    "id": 5,
+    "store": "Sed Do",
+    "items": 25,
+    "price": 99.99,
+    "date": "2021-05-05",
+    "status": "cancelado"
+  },
+  {
+    "id": 6,
+    "store": "Eiusmod Tempor",
+    "items": 35,
+    "price": 150.00,
+    "date": "2021-06-17",
+    "status": "entregue"
+  },
+  {
+    "id": 7,
+    "store": "Incididunt Labore",
+    "items": 15,
+    "price": 250.75,
+    "date": "2021-07-09",
+    "status": "pendente"
+  },
+  {
+    "id": 8,
+    "store": "Et Dolore",
+    "items": 20,
+    "price": 120.00,
+    "date": "2021-08-12",
+    "status": "entregue"
+  },
+  {
+    "id": 9,
+    "store": "Magna Aliqua",
+    "items": 50,
+    "price": 300.50,
+    "date": "2021-09-03",
+    "status": "cancelado"
+  },
+  {
+    "id": 10,
+    "store": "Ut Enim",
+    "items": 60,
+    "price": 500.00,
+    "date": "2021-10-20",
+    "status": "entregue"
+  },
+  {
+    "id": 11,
+    "store": "Minim Veniam",
+    "items": 18,
+    "price": 130.80,
+    "date": "2021-11-11",
+    "status": "pendente"
+  },
+  {
+    "id": 12,
+    "store": "Quis Nostrud",
+    "items": 45,
+    "price": 220.99,
+    "date": "2021-12-24",
+    "status": "entregue"
+  },
+  {
+    "id": 13,
+    "store": "Exercitation Ullamco",
+    "items": 33,
+    "price": 185.50,
+    "date": "2022-01-05",
+    "status": "pendente"
+  },
+  {
+    "id": 14,
+    "store": "Laboris Nisi",
+    "items": 22,
+    "price": 90.00,
+    "date": "2022-02-15",
+    "status": "cancelado"
+  },
+  {
+    "id": 15,
+    "store": "Ut Aliquip",
+    "items": 12,
+    "price": 55.75,
+    "date": "2022-03-30",
+    "status": "entregue"
+  }
+]
