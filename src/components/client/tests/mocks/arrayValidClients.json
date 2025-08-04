@@ -1,0 +1,36 @@
+[
+  {
+    "_id": "5f8f8c3f4f50f63a488486a0",
+    "name": "John Doe",
+    "cnpj": "12345678901234",
+    "cpf": "12345678901",
+    "address": {
+      "street": "Main St",
+      "neighborhood": "Downtown",
+      "number": "123",
+      "state": "SP",
+      "zip": "1234567"
+    },
+    "email": "johndoe@example.com",
+    "telephoneNumber": "1234567890",
+    "createdBy": "60a0c43b5f4b5c23d8d7e57a",
+    "active": true
+  },
+  {
+    "_id": "5f8f8c3f4f50f63a488486a1",
+    "name": "Jane Smith",
+    "cnpj": "23456789012345",
+    "cpf": "23456789012",
+    "address": {
+      "street": "Second St",
+      "neighborhood": "Suburb",
+      "number": "456",
+      "state": "RJ",
+      "zip": "2345678"
+    },
+    "email": "janesmith@example.com",
+    "telephoneNumber": "2345678901",
+    "createdBy": "60a0c43b5f4b5c23d8d7e57b",
+    "active": true
+  }
+]

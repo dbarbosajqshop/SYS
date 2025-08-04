@@ -1,0 +1,13 @@
+{
+  "orderNumber": 12345,
+  "ItemsQuantity": 2,
+  "totalQuantity": 5,
+  "totalPrice": 200.0,
+  "subtotalPrice": 180.0,
+  "discount": 20.0,
+  "local": "online",
+  "paymentStatus": "pago",
+  "typeOfPayment": "credito",
+  "typeOfDelivery": "sedex",
+  "status": "transito"
+}

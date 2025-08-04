@@ -1,0 +1,19 @@
+[
+  {
+    "_id": "66f467b34e6636006b2f0b04",
+    "sku": "ARM012SJX",
+    "name": "Arma de bolinha de gel",
+    "description": "Arma de disparos de bolinha de gel, comporta 1000 bolinhas",
+    "price": 60.9,
+    "promotionPrice": 0,
+    "height": 6,
+    "width": 12,
+    "depth": 3,
+    "weight": 1.4,
+    "quantityBox": 20,
+    "color": "blue",
+    "active": false,
+    "createdAt": "2024-09-25T19:42:43.890Z",
+    "__v": 0
+  }
+]

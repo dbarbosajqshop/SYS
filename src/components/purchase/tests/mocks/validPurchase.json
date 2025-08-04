@@ -1,0 +1,21 @@
+{
+  "Items": [
+    { 
+      "itemId": "66f467b34e6636006b2f0b04",
+      "boxQuantity": 20,
+      "boxValue": 15.2,
+      "finalPrice": 304
+    },
+    { 
+      "itemId": "66f467b34e6492006b2f0b04",
+      "boxQuantity": 20,
+      "boxValue": 12.25,
+      "finalPrice": 245
+    }
+  ],
+  "totalItems": 2,
+  "totalValue": 549,
+  "store": "Ching",
+  "purchaseDate": "2024-09-26T00:00:00Z",
+  "state": "pendente"
+}

@@ -1,0 +1,13 @@
+{
+  "cnpj": 12345678000195,
+  "cpf": 12345678901,
+  "address": {
+    "street": "Main St",
+    "neighborhood": "Downtown",
+    "state": "SP",
+    "zip": "12345-678",
+    "number": 123
+  },
+  "email": "johndoe@example.com",
+  "telephoneNumber": "1234567890"
+}
